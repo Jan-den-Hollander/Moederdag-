@@ -1,9 +1,7 @@
 /**
- * Specchio delle Fate / Magische Spiegel — v11b
- * Fixes t.o.v. v11:
- *  - TTS afkap fix: 250ms marge na onended + src.start(0)
- *  - Gemini model fallback: 2.5-flash → 2.0-flash (tekst + TTS)
- *  - Fallback boodschap altijd aanwezig bij API storing
+ * Specchio della Festa della Mamma / Magische Moederdagspiegel — v1
+ * Gebaseerd op Magische Spiegel v11b
+ * Aangepast voor Moederdag
  */
 import { useState, useRef, useEffect } from 'react';
 import { Key } from 'lucide-react';
@@ -19,51 +17,51 @@ const LANG = {
     code: 'it',
     label: '🇮🇹 Italiano',
     speechLang: 'it-IT',
-    title: 'Lo Specchio delle Fate',
+    title: 'Lo Specchio della Festa della Mamma',
     subtitle: '✦   ✦   ✦',
     chooseLabel: 'Scegli la tua lingua',
-    qName: 'Sono lo Specchio delle Fate.\nCome ti chiami?',
-    qNameSub: 'Sono la Fata dello Specchio. Come ti chiami?',
-    qDate: (n) => `Che bello conoscerti, ${n}! Quando sei nato?`,
-    qDateSub: 'Quando sei nato/a?',
+    qName: 'Sono lo Specchio della Festa della Mamma.\nCome ti chiami?',
+    qNameSub: 'Sono lo Specchio della Festa della Mamma. Come ti chiami?',
+    qDate: (n) => `Che bello conoscerti, ${n}! In che data cade la Festa della Mamma quest'anno?`,
+    qDateSub: 'In che data cade la Festa della Mamma?',
     namePlaceholder: 'Scrivi il tuo nome...',
-    datePlaceholder: '4 aprile · 15-04',
-    dateHint: 'Es: 4 aprile · aprile 4 · 15-04',
+    datePlaceholder: '11 maggio · 11-05',
+    dateHint: 'Es: 11 maggio · maggio 11 · 11-05',
     btnNext: 'Avanti ✨',
     btnShow: 'Mostra il mio messaggio 🪄',
     btnNextChild: '✨ Ora tocca al prossimo ✨',
     btnNextHint: 'Tocca qui quando tocca a un altro bambino',
     thinking: 'Lo specchio sta pensando... ✨',
     noKey: 'Nessuna chiave API impostata 🔑',
-    badDate: "Non capisco la data. Di' per es. 4 aprile o 15-04 ✨",
+    badDate: "Non capisco la data. Di' per es. 11 maggio o 11-05 ✨",
     noName: 'Dimmi prima come ti chiami! 🌟',
     notHeard: 'Non ho capito bene 🌟',
     micError: 'Il microfono non funziona in questo browser 🎤',
     listening: 'Sto ascoltando... 👂',
     fallbackNote: '✦ Lo specchio parla dalla sua memoria magica ✦',
-    bannerToday: '🎂 Oggi è il tuo grande giorno!',
-    bannerSoon: (d) => `⏳ Ancora ${d} giorno${d===1?'':'i'} al tuo compleanno!`,
-    bannerPast: (d) => `🎉 Auguri! ${Math.abs(d)} giorno${Math.abs(d)===1?'':'i'} fa era il tuo giorno speciale!`,
-    factHeader: '✦ Nel tuo giorno di nascita, in passato ✦',
+    bannerToday: '🌸 Oggi è la Festa della Mamma!',
+    bannerSoon: (d) => `⏳ Ancora ${d} giorno${d===1?'':'i'} alla Festa della Mamma!`,
+    bannerPast: (d) => `💐 Auguri! La Festa della Mamma era ${Math.abs(d)} giorno${Math.abs(d)===1?'':'i'} fa!`,
+    factHeader: '✦ In questo giorno nel passato ✦',
     keyTitle: '🔑 Chiave API',
     keyHint: 'Inserisci la chiave API Gemini.\nVerrà salvata solo su questo dispositivo.',
     keyPlaceholder: 'AIza...',
     keyCancel: 'Annulla',
     keySave: 'Salva',
     keyBtn: (has) => has ? 'Chiave API ✓' : 'Imposta chiave API',
-    emoji: { name: '🧚', date: '🎂' },
-    promptSystem: `Sei lo Specchio delle Fate in un bosco incantato. Parla in modo caldo, gioioso e adatto ai bambini. Rispondi SOLO in JSON senza markdown.`,
+    emoji: { name: '🧚', date: '🌸' },
+    promptSystem: `Sei lo Specchio della Festa della Mamma in un bosco incantato. Parla in modo caldo, gioioso e adatto ai bambini. Rispondi SOLO in JSON senza markdown.`,
     buildPrompt: (name, day, month, daysUntil) => {
       const mesi = ['gennaio','febbraio','marzo','aprile','maggio','giugno',
         'luglio','agosto','settembre','ottobre','novembre','dicembre'];
       const mese = mesi[month - 1];
       let timing = '';
-      if (daysUntil === 0) timing = 'OGGI è il compleanno!';
-      else if (daysUntil > 0 && daysUntil <= 7) timing = `Tra ${daysUntil} giorno${daysUntil===1?'':'i'} è il compleanno.`;
-      else if (daysUntil < 0 && daysUntil >= -7) timing = `Il compleanno era ${Math.abs(daysUntil)} giorno${Math.abs(daysUntil)===1?'':'i'} fa.`;
-      return `Bambino: ${name} | Compleanno: ${day} ${mese} | ${timing}
+      if (daysUntil === 0) timing = 'OGGI è la Festa della Mamma!';
+      else if (daysUntil > 0 && daysUntil <= 7) timing = `Tra ${daysUntil} giorno${daysUntil===1?'':'i'} è la Festa della Mamma.`;
+      else if (daysUntil < 0 && daysUntil >= -7) timing = `La Festa della Mamma era ${Math.abs(daysUntil)} giorno${Math.abs(daysUntil)===1?'':'i'} fa.`;
+      return `Persona: ${name} | Festa della Mamma quest'anno: ${day} ${mese} | ${timing}
 
-Dai un messaggio di compleanno personale (max 3 frasi) e esattamente 2 o 3 fatti storici reali del ${day} ${mese} che i bambini trovano interessanti (artisti, animali, giocattoli, parchi divertimento, cartoni animati, invenzioni).
+Dai un messaggio caldo e personale per la Festa della Mamma (max 3 frasi) per qualcuno che festeggia. Menziona il nome. Aggiungi anche esattamente 2 o 3 fatti storici reali accaduti il ${day} ${mese} nel passato, che i bambini trovano interessanti (artisti, animali, giocattoli, invenzioni, cartoni animati).
 
 Rispondi SOLO come JSON senza markdown:
 {"it":"...","facts":[{"year":1984,"it":"..."}]}`;
@@ -73,51 +71,51 @@ Rispondi SOLO come JSON senza markdown:
     code: 'nl',
     label: '🇳🇱 Nederlands',
     speechLang: 'nl-NL',
-    title: 'Magische Spiegel',
+    title: 'Magische Moederdagspiegel',
     subtitle: '✦   ✦   ✦',
     chooseLabel: 'Kies je taal',
-    qName: 'Ik ben de Magische Spiegel.\nHoe heet jij?',
-    qNameSub: 'Ik ben de Feeënspiegel. Hoe heet jij?',
-    qDate: (n) => `Fijn om je te ontmoeten, ${n}! Wanneer ben jij geboren?`,
-    qDateSub: 'Wanneer ben jij geboren?',
+    qName: 'Ik ben de Magische Moederdag Spiegel.\nHoe heet jij?',
+    qNameSub: 'Ik ben de Magische Moederdagspiegel. Hoe heet jij?',
+    qDate: (n) => `Fijn om je te ontmoeten, ${n}! Op welke datum is moederdag dit jaar?`,
+    qDateSub: 'Op welke datum is moederdag dit jaar?',
     namePlaceholder: 'Typ je naam...',
-    datePlaceholder: '4 april · 15-04',
-    dateHint: 'Bijv: 4 april · april 4 · 15-04',
+    datePlaceholder: '11 mei · 11-05',
+    dateHint: 'Bijv: 11 mei · mei 11 · 11-05',
     btnNext: 'Verder ✨',
     btnShow: 'Toon mijn boodschap 🪄',
     btnNextChild: '✨ Volgende Graag ✨',
     btnNextHint: 'Tik hier als een ander kind aan de beurt is',
     thinking: 'De spiegel denkt na... ✨',
     noKey: 'Geen API sleutel ingesteld 🔑',
-    badDate: 'Ik begrijp de datum niet. Zeg bijv. 4 april of 15-04 ✨',
+    badDate: 'Ik begrijp de datum niet. Zeg bijv. 11 mei of 11-05 ✨',
     noName: 'Vertel mij eerst hoe je heet! 🌟',
     notHeard: 'Niet goed gehoord 🌟',
     micError: 'Microfoon werkt niet in deze browser 🎤',
     listening: 'Ik luister... 👂',
     fallbackNote: '✦ De spiegel spreekt vanuit haar eigen magische geheugen ✦',
-    bannerToday: '🎂 Vandaag is jouw grote dag!',
-    bannerSoon: (d) => `⏳ Nog ${d} dag${d===1?'':'en'} tot jouw verjaardag!`,
-    bannerPast: (d) => `🎉 Gefeliciteerd! ${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} geleden!`,
-    factHeader: '✦ Op jouw verjaardag in het verleden ✦',
+    bannerToday: '🌸 Vandaag is het Moederdag!',
+    bannerSoon: (d) => `⏳ Nog ${d} dag${d===1?'':'en'} tot Moederdag!`,
+    bannerPast: (d) => `💐 Fijne Moederdag! ${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} geleden!`,
+    factHeader: '✦ Op deze dag in het verleden ✦',
     keyTitle: '🔑 API Sleutel',
     keyHint: 'Voer de Gemini API sleutel in.\nWordt alleen op dit apparaat opgeslagen.',
     keyPlaceholder: 'AIza...',
     keyCancel: 'Annuleer',
     keySave: 'Opslaan',
     keyBtn: (has) => has ? 'API sleutel ✓' : 'API sleutel instellen',
-    emoji: { name: '🧚', date: '🎂' },
-    promptSystem: `Je bent de Magische Spiegel in een betoverd sprookjesbos. Spreek warm, vrolijk en kindvriendelijk. Antwoord ALLEEN als JSON zonder markdown.`,
+    emoji: { name: '🧚', date: '🌸' },
+    promptSystem: `Je bent de Magische Moederdagspiegel in een betoverd sprookjesbos. Spreek warm, vrolijk en kindvriendelijk. Antwoord ALLEEN als JSON zonder markdown.`,
     buildPrompt: (name, day, month, daysUntil) => {
       const maanden = ['januari','februari','maart','april','mei','juni',
         'juli','augustus','september','oktober','november','december'];
       const maand = maanden[month - 1];
       let timing = '';
-      if (daysUntil === 0) timing = 'VANDAAG is de verjaardag!';
-      else if (daysUntil > 0 && daysUntil <= 7) timing = `Over ${daysUntil} dag${daysUntil===1?'':'en'} is de verjaardag.`;
-      else if (daysUntil < 0 && daysUntil >= -7) timing = `De verjaardag was ${Math.abs(daysUntil)} dag${Math.abs(daysUntil)===1?'':'en'} geleden.`;
-      return `Kind: ${name} | Verjaardag: ${day} ${maand} | ${timing}
+      if (daysUntil === 0) timing = 'VANDAAG is het Moederdag!';
+      else if (daysUntil > 0 && daysUntil <= 7) timing = `Over ${daysUntil} dag${daysUntil===1?'':'en'} is het Moederdag.`;
+      else if (daysUntil < 0 && daysUntil >= -7) timing = `Moederdag was ${Math.abs(daysUntil)} dag${Math.abs(daysUntil)===1?'':'en'} geleden.`;
+      return `Persoon: ${name} | Moederdag dit jaar: ${day} ${maand} | ${timing}
 
-Geef een persoonlijke verjaardagsboodschap (max 3 zinnen) én precies 2 of 3 echte historische feitjes van ${day} ${maand} die kinderen leuk vinden (artiesten, dieren, speelgoed, pretparken, tekenfilms, uitvindingen).
+Geef een warm, persoonlijk Moederdagbericht (max 3 zinnen) voor iemand die Moederdag viert. Noem de naam. Voeg ook precies 2 of 3 echte historische feitjes toe die zijn gebeurd op ${day} ${maand} in het verleden, die kinderen leuk vinden (artiesten, dieren, speelgoed, uitvindingen, tekenfilms).
 
 Antwoord ALLEEN als JSON zonder markdown:
 {"nl":"...","facts":[{"year":1984,"nl":"..."}]}`;
@@ -186,14 +184,12 @@ async function geminiTTS(text, apiKey, langCode = 'it') {
       src.buffer = buf;
       src.connect(ctx.destination);
       return new Promise((resolve, reject) => {
-        // 250ms marge zodat laatste lettergreep niet wordt afgeknipt
         src.onended = () => { setTimeout(() => { ctx.close(); resolve(); }, 250); };
         src.onerror = (e) => { ctx.close(); reject(e); };
         src.start(0);
       });
     } catch (err) {
       lastErr = err;
-      // probeer volgend TTS model
     }
   }
   throw lastErr;
@@ -238,9 +234,9 @@ async function speakText(text, langCode, apiKey, onStart = () => {}, onEnd = () 
 async function speakAll(boodschap, facts, langCode, apiKey, factKey, onStart, onEnd) {
   const feitjesTekst = facts.length > 0
     ? (langCode === 'it'
-        ? 'E sapevi che nel tuo giorno di nascita sono successe cose speciali? '
+        ? 'E sapevi che in questo giorno sono successe cose speciali? '
           + facts.map(f => `Nell\'anno ${f.year}: ${f.it || f.nl}`).join('. ') + '.'
-        : 'En wist je dat er op jouw verjaardag ook bijzondere dingen zijn gebeurd? '
+        : 'En wist je dat er op deze dag ook bijzondere dingen zijn gebeurd? '
           + facts.map(f => `In het jaar ${f.year}: ${f.nl || f.it}`).join('. ') + '.')
     : '';
   const full = feitjesTekst ? `${boodschap} ${feitjesTekst}` : boodschap;
@@ -258,25 +254,25 @@ function buildFallback(name, day, month, daysUntil, lang) {
   let begroeting = '';
   if (daysUntil === 0) {
     begroeting = lang === 'it'
-      ? `Oggi è il tuo grande giorno, ${name}! Il mondo intero è felice che tu ci sia! 🎉`
-      : `Vandaag is jouw grote dag, ${name}! De hele wereld is blij dat jij er bent! 🎉`;
+      ? `Oggi è la Festa della Mamma, ${name}! Che giornata speciale e piena d'amore! 🌸`
+      : `Vandaag is het Moederdag, ${name}! Wat een bijzondere dag vol liefde! 🌸`;
   } else if (daysUntil > 0 && daysUntil <= 7) {
     begroeting = lang === 'it'
-      ? `Ancora solo ${daysUntil} giorno${daysUntil===1?'':'i'}, ${name}! Il tuo compleanno sta arrivando! 🎈`
-      : `Nog maar ${daysUntil} dag${daysUntil===1?'':'en'} te gaan, ${name}! Jouw verjaardag komt er heel snel aan! 🎈`;
+      ? `Ancora solo ${daysUntil} giorno${daysUntil===1?'':'i'}, ${name}! La Festa della Mamma sta arrivando! 💐`
+      : `Nog maar ${daysUntil} dag${daysUntil===1?'':'en'} te gaan, ${name}! Moederdag komt er snel aan! 💐`;
   } else if (daysUntil < 0 && daysUntil >= -7) {
     begroeting = lang === 'it'
-      ? `Auguri, ${name}! Il tuo giorno speciale era ${Math.abs(daysUntil)} giorno${Math.abs(daysUntil)===1?'':'i'} fa. Spero che tu stia ancora festeggiando! 🎂`
-      : `Gefeliciteerd, ${name}! ${Math.abs(daysUntil)} dag${Math.abs(daysUntil)===1?'':'en'} geleden was jouw bijzondere dag. Ik hoop dat je er nog steeds van geniet! 🎂`;
+      ? `La Festa della Mamma era ${Math.abs(daysUntil)} giorno${Math.abs(daysUntil)===1?'':'i'} fa, ${name}! Spero che sia stata una giornata magica! 🌸`
+      : `Moederdag was ${Math.abs(daysUntil)} dag${Math.abs(daysUntil)===1?'':'en'} geleden, ${name}! Ik hoop dat het een magische dag was! 🌸`;
   } else {
     begroeting = lang === 'it'
-      ? `Che meraviglia essere nata il ${day} ${mese}, ${name}! È un giorno davvero magico! 🌟`
-      : `Wat bijzonder dat jij op ${day} ${mese} geboren bent, ${name}! Dat is een heel magische dag! 🌟`;
+      ? `Che bello festeggiare la Festa della Mamma il ${day} ${mese}, ${name}! È un giorno davvero speciale! 🌟`
+      : `Wat fijn om Moederdag te vieren op ${day} ${mese}, ${name}! Dat is een heel bijzondere dag! 🌟`;
   }
 
   const testo = lang === 'it'
-    ? `${begroeting} Lo Specchio delle Fate sa che sei una persona molto speciale, perché nel tuo giorno di nascita c'è sempre un po' di magia nell'aria. Chiudi gli occhi ed esprimi un desiderio — a volte si avverano davvero! ✨`
-    : `${begroeting} De Magische Spiegel weet zeker dat jij een heel speciaal iemand bent, want op jouw verjaardag schijnt er altijd een beetje extra magie in de lucht. Sluit je ogen en maak een wens — soms komen die echt uit! ✨`;
+    ? `${begroeting} Lo Specchio della Festa della Mamma sa che le mamme sono le persone più magiche del mondo. Oggi è il momento di dirle quanto le vuoi bene! ✨`
+    : `${begroeting} De Magische Moederdagspiegel weet zeker dat moeders de meest bijzondere mensen ter wereld zijn. Vertel haar vandaag hoe veel je van haar houdt! ✨`;
 
   const seizoen = [12,1,2].includes(month) ? 'winter'
     : [3,4,5].includes(month) ? 'lente'
@@ -448,7 +444,7 @@ function LangOverlay({ onSelect }) {
         borderRadius:'50% 50% 47% 47%', zIndex:10, gap:14,
       }}
     >
-      <div style={{ fontSize:28 }}>🪞</div>
+      <div style={{ fontSize:28 }}>🌸</div>
       <p style={{ color:'#f5e642', fontSize:11, textAlign:'center', margin:0,
         fontFamily:"'IM Fell English', serif", letterSpacing:'0.1em',
         textShadow:'0 0 10px rgba(245,230,66,0.48)', lineHeight:1.7 }}>
@@ -572,7 +568,7 @@ function SpeechBubble({ message, lang, onSpeak }) {
 
       <p style={{ margin:'0 0 10px', color:'#f5e642', lineHeight:1.7, fontSize:14,
         fontFamily:"'IM Fell English', serif", textShadow:'0 0 8px rgba(245,230,66,0.22)' }}>
-        ✨ {text}
+        🌸 {text}
       </p>
 
       {facts.length > 0 && (
@@ -782,7 +778,7 @@ export default function MagischeSpiegel() {
   })();
 
   const isDone = step === STEP.DONE;
-  const currentTitle = step === STEP.LANG ? 'Lo Specchio delle Fate' : L.title;
+  const currentTitle = step === STEP.LANG ? 'Lo Specchio della Festa della Mamma' : L.title;
 
   return (
     <div style={S.app}>
