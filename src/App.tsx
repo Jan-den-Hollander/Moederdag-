@@ -29,7 +29,7 @@ const LANG = {
     dateHint: 'Es: 11 maggio · maggio 11 · 11-05',
     btnNext: 'Avanti ✨',
     btnShow: 'Mostra il mio messaggio 🪄',
-    btnNextChild: '✨ Arrivederci, all'anno prossimo ✨',
+    btnNextChild: '✨ Arrivederci, all\'anno prossimo ✨',
     btnNextHint: 'Tocca qui quando tocca a un altro',
     thinking: 'Lo specchio sta pensando... ✨',
     noKey: 'Nessuna chiave API impostata 🔑',
@@ -44,8 +44,12 @@ const LANG = {
     bannerPast: (d) => `💐 Auguri! La Festa della Mamma era ${Math.abs(d)} giorno${Math.abs(d)===1?'':'i'} fa!`,
     factHeader: '✦ In questo giorno nel passato ✦',
     keyTitle: '🔑 Chiave API',
-    keyHint: 'Inserisci la chiave API Gemini.\nOttieni la tua chiave gratuita su aistudio.google.com\n→ "Get API key" → "Create API key"\nVerrà salvata solo su questo dispositivo.',
-keyHintUrl: 'https://aistudio.google.com/app/apikey',
+    keyHint: 'Inserisci la chiave API Gemini.\nOttieni la tua chiave gratuita su:',
+    keyHintUrl: 'https://aistudio.google.com/app/apikey',
+    keyHintUrlLabel: 'aistudio.google.com',
+    keyHintSteps: '→ "Get API key" → "Create API key"',
+    keyHintSave: 'Verrà salvata solo su questo dispositivo.',
+    keyPlaceholder: 'AIza...',
     keyCancel: 'Annulla',
     keySave: 'Salva',
     keyBtn: (has) => has ? 'Chiave API ✓' : 'Imposta chiave API',
@@ -98,8 +102,11 @@ Rispondi SOLO come JSON senza markdown:
     bannerPast: (d) => `💐 Fijne Moederdag! ${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} geleden!`,
     factHeader: '✦ Op deze dag in het verleden ✦',
     keyTitle: '🔑 API Sleutel',
-    keyHint: 'Voer de Gemini API sleutel in.\nHaal je gratis sleutel op via aistudio.google.com\n→ "Get API key" → "Create API key"\nWordt alleen op dit apparaat opgeslagen.',
-keyHintUrl: 'https://aistudio.google.com/app/apikey',
+    keyHint: 'Voer de Gemini API sleutel in.\nHaal je gratis sleutel op via:',
+    keyHintUrl: 'https://aistudio.google.com/app/apikey',
+    keyHintUrlLabel: 'aistudio.google.com',
+    keyHintSteps: '→ "Get API key" → "Create API key"',
+    keyHintSave: 'Wordt alleen op dit apparaat opgeslagen.',
     keyPlaceholder: 'AIza...',
     keyCancel: 'Annuleer',
     keySave: 'Opslaan',
@@ -937,14 +944,37 @@ export default function MagischeSpiegel() {
         </button>
       )}
 
-      {/* API sleutel modal */}
+      {/* ── API sleutel modal (met link en uitleg) ── */}
       <AnimatePresence>
         {showKeyModal && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
             style={S.modal} onClick={e => e.target===e.currentTarget && setShowKeyModal(false)}>
             <div style={S.modalBox}>
               <h2 style={S.modalTitle}>{L.keyTitle}</h2>
-              <p style={S.modalHint}>{L.keyHint}</p>
+
+              {/* Uitleg met klikbare link */}
+              <div style={{ marginBottom:14, fontSize:11, lineHeight:1.75,
+                color:'rgba(245,230,66,0.5)', textAlign:'center' }}>
+                <p style={{ margin:'0 0 6px' }}>{L.keyHint}</p>
+                <a
+                  href={L.keyHintUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color:'#d4a017', textDecoration:'underline',
+                    fontFamily:"'IM Fell English', serif", fontSize:12,
+                  }}
+                >
+                  {L.keyHintUrlLabel}
+                </a>
+                <p style={{ margin:'4px 0 0', color:'rgba(245,230,66,0.35)', fontSize:10 }}>
+                  {L.keyHintSteps}
+                </p>
+                <p style={{ margin:'6px 0 0', color:'rgba(245,230,66,0.25)', fontSize:10 }}>
+                  {L.keyHintSave}
+                </p>
+              </div>
+
               <input type="password" id="keyInp" defaultValue={apiKey}
                 placeholder={L.keyPlaceholder} style={S.modalInput}/>
               <div style={{ display:'flex', gap:10, marginTop:16 }}>
@@ -1101,10 +1131,6 @@ const S = {
   modalTitle: {
     margin:'0 0 4px', fontWeight:400, fontSize:18,
     color:'#f5e642', textAlign:'center', fontFamily:"'IM Fell English', serif",
-  },
-  modalHint: {
-    margin:'0 0 14px', fontSize:11, lineHeight:1.6,
-    color:'rgba(245,230,66,0.4)', textAlign:'center', whiteSpace:'pre-line',
   },
   modalInput: {
     width:'100%', background:'rgba(0,0,0,0.4)',
